@@ -1,0 +1,35 @@
+## [Unreleased] - yyyy-mm-dd
+
+
+## [0.2.5-SNAPSHOT] - 2021-01-07
+Servizi pubblici
+•	GET V2/public/rooms/{roomId}/availabilitis
+•	GET V2/public/rooms/{roomId}/events
+•	GET V2/public/rooms/typologies
+•	GET V2/public/rooms/categories
+•	GET V2/public/rooms
+•	POST V2/rooms
+
+
+## [0.2.4-SNAPSHOT] - 2020-12-18
+Servizi pubblici
+•	V2/rooms/{roomId}/availabilitis
+•	V2/rooms/{roomId}/events
+•	V2/rooms/typologies
+•	V2/rooms/categories
+•	V2/rooms
+
+Fix giorni anticipo
+
+## [0.2.0-SNAPSHOT] - 2020-12-11
+
+Fix tipoEnvento
+
+## [0.2.0-SNAPSHOT] - 2020-11-20
+  
+Stato, civico e cap opzionali
+
+### Added
+ 
+### Changed
+  

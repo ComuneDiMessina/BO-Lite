@@ -1,0 +1,15 @@
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: full
+        
+integrator:
+  endpoint: http://10.207.237.84:8280
+#documentale
+documentale:
+  endpoint: http://10.207.236.244:8080/api/v1
+#roomBooking
+roombooking:
+  endpoint: http://localhost:7000
+

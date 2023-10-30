@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" id="Definitions_1beyrcg" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.9.1">
+  <bpmn:process id="auto-casefile" name="auto-casefile" processType="None" isClosed="false" isExecutable="true">
+    <bpmn:eventBasedGateway id="EventBasedGateway_0c6kaix">
+      <bpmn:incoming>Flow_0kzk2ad</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1l98lvt</bpmn:outgoing>
+      <bpmn:outgoing>SequenceFlow_1qhxg3l</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_1q82jhu" name="Scadenza termini">
+      <bpmn:incoming>SequenceFlow_1l98lvt</bpmn:incoming>
+      <bpmn:outgoing>Flow_044mow3</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_0dri9m6">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">=remainingTime</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_086iqnu" name="Pagamento ricevuto">
+      <bpmn:incoming>SequenceFlow_1qhxg3l</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0qkyw8d</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1dsmlwl" messageRef="Message_1b56a08" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="ServiceTask_15ohdml" name="Annullamento Posizione Debitoria" implementation="##WebService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="cf-debt-update-state" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="stateTypeOutstandingDebt" value="ANNULLATA" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1h4j11h</bpmn:incoming>
+      <bpmn:outgoing>Flow_1g2i3r7</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="ServiceTask_0qesxu0" name="Chiusura Posizione Debitoria" implementation="##WebService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="cf-debt-update-state" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="stateTypeOutstandingDebt" value="CHIUSA" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0qkyw8d</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zvuev2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="ExclusiveGateway_14mbdyg">
+      <bpmn:incoming>Flow_1aa8w3m</bpmn:incoming>
+      <bpmn:incoming>Flow_0z61fvl</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_07a8lha</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="EndEvent_0ffbgp3">
+      <bpmn:incoming>SequenceFlow_07a8lha</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1l98lvt" sourceRef="EventBasedGateway_0c6kaix" targetRef="IntermediateCatchEvent_1q82jhu" />
+    <bpmn:sequenceFlow id="SequenceFlow_1qhxg3l" sourceRef="EventBasedGateway_0c6kaix" targetRef="IntermediateCatchEvent_086iqnu" />
+    <bpmn:sequenceFlow id="SequenceFlow_0qkyw8d" sourceRef="IntermediateCatchEvent_086iqnu" targetRef="ServiceTask_0qesxu0" />
+    <bpmn:sequenceFlow id="SequenceFlow_07a8lha" sourceRef="ExclusiveGateway_14mbdyg" targetRef="EndEvent_0ffbgp3" />
+    <bpmn:serviceTask id="Activity_1275hcy" name="Stato Pratica: Annullata" implementation="##WebService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="casefile-update" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="stateType" value="7" />
+          <zeebe:header key="message" value="Decorrenza Termini" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1g2i3r7</bpmn:incoming>
+      <bpmn:outgoing>Flow_1jf4gsj</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1g2i3r7" sourceRef="ServiceTask_15ohdml" targetRef="Activity_1275hcy" />
+    <bpmn:serviceTask id="Activity_1ydyq8p" name="Stato Pratica: Validata" implementation="##WebService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="casefile-update" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="stateType" value="5" />
+          <zeebe:header key="message" value="Pagamento Ricevuto" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0zvuev2</bpmn:incoming>
+      <bpmn:outgoing>Flow_1rso00o</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0zvuev2" sourceRef="ServiceTask_0qesxu0" targetRef="Activity_1ydyq8p" />
+    <bpmn:serviceTask id="Activity_0mie98y" name="Invio Notifica" implementation="##WebService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="email-send" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="notificationType" value="PS_ANNULLATA" />
+          <zeebe:header key="emailTemplateType" value="templateAnnullata.html" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1jf4gsj</bpmn:incoming>
+      <bpmn:outgoing>Flow_1aa8w3m</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1jf4gsj" sourceRef="Activity_1275hcy" targetRef="Activity_0mie98y" />
+    <bpmn:sequenceFlow id="Flow_1aa8w3m" sourceRef="Activity_0mie98y" targetRef="ExclusiveGateway_14mbdyg" />
+    <bpmn:serviceTask id="Activity_1d6lt96" name="Invio Notifica" implementation="##WebService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="email-send" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="notificationType" value="PS_CHIUSA" />
+          <zeebe:header key="emailTemplateType" value="templateConfermata.html" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1rso00o</bpmn:incoming>
+      <bpmn:outgoing>Flow_0z61fvl</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1rso00o" sourceRef="Activity_1ydyq8p" targetRef="Activity_1d6lt96" />
+    <bpmn:sequenceFlow id="Flow_0z61fvl" sourceRef="Activity_1d6lt96" targetRef="ExclusiveGateway_14mbdyg" />
+    <bpmn:startEvent id="Event_0oq01eg" name="Avvio lavorazione">
+      <bpmn:outgoing>Flow_0kzk2ad</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_1yk1q7h" name="Invio Richiesta Cancellazione su PmPay" implementation="##WebService">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="debt-cancel" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_044mow3</bpmn:incoming>
+      <bpmn:outgoing>Flow_1h4j11h</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_044mow3" sourceRef="IntermediateCatchEvent_1q82jhu" targetRef="Activity_1yk1q7h" />
+    <bpmn:sequenceFlow id="Flow_1h4j11h" sourceRef="Activity_1yk1q7h" targetRef="ServiceTask_15ohdml" />
+    <bpmn:sequenceFlow id="Flow_0kzk2ad" sourceRef="Event_0oq01eg" targetRef="EventBasedGateway_0c6kaix" />
+    <bpmn:textAnnotation id="TextAnnotation_05a3y2x">
+      <bpmn:text>Viene inviata una email al richiedente con l'indicazione che il pagamento è andato in decorrenza termini</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_09bf6fu" sourceRef="Activity_0mie98y" targetRef="TextAnnotation_05a3y2x" />
+    <bpmn:textAnnotation id="TextAnnotation_0qpz9ms">
+      <bpmn:text>Viene inviata una email al richiedente con l'indicazione che il pagamento è andato a buon fine</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_12baeda" sourceRef="Activity_1d6lt96" targetRef="TextAnnotation_0qpz9ms" />
+    <bpmn:textAnnotation id="TextAnnotation_0vb6u5i">
+      <bpmn:text>Archiviazione RT</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_160ag7k" sourceRef="ServiceTask_0qesxu0" targetRef="TextAnnotation_0vb6u5i" />
+    <bpmn:textAnnotation id="TextAnnotation_17s52so">
+      <bpmn:text>IUV, importo</bpmn:text>
+    </bpmn:textAnnotation>
+    <bpmn:association id="Association_0oq7lxw" sourceRef="Event_0oq01eg" targetRef="TextAnnotation_17s52so" />
+  </bpmn:process>
+  <bpmn:message id="Message_1b56a08" name="PaymentReceived">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=idCaseFile" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_16frys9" name="PaymentReceived">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=idCaseFile" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="auto-casefile">
+      <bpmndi:BPMNEdge id="Flow_0kzk2ad_di" bpmnElement="Flow_0kzk2ad">
+        <di:waypoint x="548" y="158" />
+        <di:waypoint x="548" y="245" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1h4j11h_di" bpmnElement="Flow_1h4j11h">
+        <di:waypoint x="395" y="470" />
+        <di:waypoint x="395" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_044mow3_di" bpmnElement="Flow_044mow3">
+        <di:waypoint x="395" y="338" />
+        <di:waypoint x="395" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0z61fvl_di" bpmnElement="Flow_0z61fvl">
+        <di:waypoint x="634" y="800" />
+        <di:waypoint x="565" y="800" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1rso00o_di" bpmnElement="Flow_1rso00o">
+        <di:waypoint x="684" y="720" />
+        <di:waypoint x="684" y="760" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1aa8w3m_di" bpmnElement="Flow_1aa8w3m">
+        <di:waypoint x="445" y="800" />
+        <di:waypoint x="515" y="800" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1jf4gsj_di" bpmnElement="Flow_1jf4gsj">
+        <di:waypoint x="395" y="720" />
+        <di:waypoint x="395" y="760" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zvuev2_di" bpmnElement="Flow_0zvuev2">
+        <di:waypoint x="684" y="590" />
+        <di:waypoint x="684" y="640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1g2i3r7_di" bpmnElement="Flow_1g2i3r7">
+        <di:waypoint x="395" y="590" />
+        <di:waypoint x="395" y="640" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_07a8lha_di" bpmnElement="SequenceFlow_07a8lha">
+        <di:waypoint x="540" y="825" />
+        <di:waypoint x="540" y="882" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0qkyw8d_di" bpmnElement="SequenceFlow_0qkyw8d">
+        <di:waypoint x="684" y="338" />
+        <di:waypoint x="684" y="510" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1qhxg3l_di" bpmnElement="SequenceFlow_1qhxg3l">
+        <di:waypoint x="573" y="270" />
+        <di:waypoint x="684" y="270" />
+        <di:waypoint x="684" y="302" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1l98lvt_di" bpmnElement="SequenceFlow_1l98lvt">
+        <di:waypoint x="523" y="270" />
+        <di:waypoint x="395" y="270" />
+        <di:waypoint x="395" y="302" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EventBasedGateway_0c6kaix_di" bpmnElement="EventBasedGateway_0c6kaix">
+        <dc:Bounds x="523" y="245" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_1q82jhu_di" bpmnElement="IntermediateCatchEvent_1q82jhu" bioc:stroke="rgb(229, 57, 53)" bioc:fill="rgb(255, 205, 210)">
+        <dc:Bounds x="377" y="302" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="295" y="280" width="86" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_086iqnu_di" bpmnElement="IntermediateCatchEvent_086iqnu" bioc:stroke="rgb(67, 160, 71)" bioc:fill="rgb(200, 230, 201)">
+        <dc:Bounds x="666" y="302" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="709" y="269" width="57" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_15ohdml_di" bpmnElement="ServiceTask_15ohdml" bioc:stroke="black" bioc:fill="white">
+        <dc:Bounds x="345" y="510" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0qesxu0_di" bpmnElement="ServiceTask_0qesxu0" bioc:stroke="black" bioc:fill="white">
+        <dc:Bounds x="634" y="510" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_14mbdyg_di" bpmnElement="ExclusiveGateway_14mbdyg" isMarkerVisible="true">
+        <dc:Bounds x="515" y="775" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0ffbgp3_di" bpmnElement="EndEvent_0ffbgp3">
+        <dc:Bounds x="522" y="882" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1275hcy_di" bpmnElement="Activity_1275hcy">
+        <dc:Bounds x="345" y="640" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ydyq8p_di" bpmnElement="Activity_1ydyq8p">
+        <dc:Bounds x="634" y="640" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0mie98y_di" bpmnElement="Activity_0mie98y" bioc:stroke="black" bioc:fill="white">
+        <dc:Bounds x="345" y="760" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1d6lt96_di" bpmnElement="Activity_1d6lt96" bioc:stroke="black" bioc:fill="white">
+        <dc:Bounds x="634" y="760" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0oq01eg_di" bpmnElement="Event_0oq01eg">
+        <dc:Bounds x="530" y="122" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="505" y="85" width="86" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1yk1q7h_di" bpmnElement="Activity_1yk1q7h" bioc:stroke="rgb(67, 160, 71)" bioc:fill="rgb(200, 230, 201)">
+        <dc:Bounds x="345" y="390" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_05a3y2x_di" bpmnElement="TextAnnotation_05a3y2x">
+        <dc:Bounds x="160" y="690" width="99.98924268502583" height="135.97246127366608" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0qpz9ms_di" bpmnElement="TextAnnotation_0qpz9ms">
+        <dc:Bounds x="810" y="690" width="99.98924268502583" height="122.20309810671256" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_0vb6u5i_di" bpmnElement="TextAnnotation_0vb6u5i">
+        <dc:Bounds x="810" y="350" width="100" height="40" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="TextAnnotation_17s52so_di" bpmnElement="TextAnnotation_17s52so">
+        <dc:Bounds x="670" y="100" width="99.98924268502583" height="25.817555938037867" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Association_09bf6fu_di" bpmnElement="Association_09bf6fu">
+        <di:waypoint x="345" y="788" />
+        <di:waypoint x="260" y="770" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_12baeda_di" bpmnElement="Association_12baeda">
+        <di:waypoint x="734" y="786" />
+        <di:waypoint x="810" y="765" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_160ag7k_di" bpmnElement="Association_160ag7k">
+        <di:waypoint x="729" y="511" />
+        <di:waypoint x="841" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Association_0oq7lxw_di" bpmnElement="Association_0oq7lxw">
+        <di:waypoint x="566" y="137" />
+        <di:waypoint x="670" y="121" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

@@ -1,0 +1,103 @@
+# Spring Boot configuration
+spring:
+  jpa:
+    show-sql: false
+    hibernate:
+      naming_strategy: org.hibernate.cfg.ImprovedNamingStrategy
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        temp:
+          use_jdbc_metadata_defaults: false
+  datasource:
+    url: jdbc:postgresql://test:5432/impleme-bolite?currentSchema=bolite
+    platform: postgresql
+    username: bolite
+    password: bolite
+    driverClassName: org.postgresql.Driver
+    open-in-view: false
+    generate-ddl: false
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+  mail:
+    username: test@gmail.com
+    password: test
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail.debug: true
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.ssl.trust: smtp.gmail.com
+
+porta:
+  url:  http://10.100.208.154
+  username: test
+  password: test
+
+ljsa:
+  oidc:
+    issuer-key: https://spid-dev.impleme.giottolabs.com:443/oauth2/token
+    roles-key: groups
+    subject-key: sub
+    url-jwk-provider: https://spid-dev.impleme.giottolabs.com/oauth2/jwks
+  profilemanager:
+    enabled: true
+    micro-service-id: daf86cc4-0127-4203-b78b-4734ec2eeee7
+    security:
+      plaintext: true
+    contact-point: 127.0.0.1:9090
+  ssl-validation: false
+  #skip-urls: /v2/casefiles/spontaneous,/v2/casefiles/generics,/v2/outstandingDebts/**,/v2/messages/casefiles/**/outstandingdebts,/v2/casefiles/spontaneous,/v2/roombookings/doors,/v2/public/**
+  skip-urls: /**
+#FEIGN
+feign:
+  client.config.default.loggerLevel: basic
+  httpclient.disableSslValidation: true
+  httpclient.enabled: false
+  okhttp.enabled: true
+
+# Server configuration
+server:
+  port: 8080
+  sessionTimeout: 30
+
+#ZEEBE
+zeebe:
+  client:
+    broker:
+      contactPoint: "localhost:26500"
+    worker:
+      defaultName: worker
+
+
+  workflow_roombooking: "booking-casefile"
+  workflow_auto: "auto-casefile"
+  workflow_generic: "generic-casefile"
+
+#ESB
+integrator:
+  endpoint: https://eigtw-dev.impleme.giottolabs.com    #SVILUPPO
+
+#DOCUMENTALE
+documentale:
+  endpoint: http://documentale-dev.comune.messina.it/api/v1 #SVILUPPO
+
+
+report:
+  tempDir: tmp/
+
+attachment:
+  tmp: "Impleme"
+  #base: "/opt/data"
+  base: ${user.home}
+debug: true
+logging:
+  level:
+    io.zeebe.client.job.poller: ERROR
+
+tributi:
+  diritti: "01"

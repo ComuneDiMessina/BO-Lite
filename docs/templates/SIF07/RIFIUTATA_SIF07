@@ -1,0 +1,1 @@
+<html> <head></head> <body> <p>Spett.le ${nome_ric} ${cognome_ric},</p> <p>Con la presente si comunica che la Sua richiesta di prenotazione:</p>Spazio: ${spazio}<br>Data: ${data_prenotazione}<br>Orario: ${orario_prenotazione}  <p>&Egrave; stata RESPINTA con la seguente motivazione: ${note} </p> <p>Distinti saluti</p></body> </html>

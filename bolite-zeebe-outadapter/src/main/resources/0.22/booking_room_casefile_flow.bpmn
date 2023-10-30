@@ -1,0 +1,998 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bioc="http://bpmn.io/schema/bpmn/biocolor/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1tow2j2" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Zeebe Modeler" exporterVersion="0.8.0">
+  <bpmn:process id="booking-casefile" name="booking_casefile" isExecutable="true">
+    <bpmn:subProcess id="SubProcess_1xw7dgf">
+      <bpmn:incoming>SequenceFlow_10kxuyi</bpmn:incoming>
+      <bpmn:startEvent id="StartEvent_1266tl3" name="CaseFile received">
+        <bpmn:outgoing>SequenceFlow_13givf4</bpmn:outgoing>
+      </bpmn:startEvent>
+      <bpmn:serviceTask id="ServiceTask_0n98v4m" name="Generate Case File PDF">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-persist" />
+          <zeebe:ioMapping>
+            <zeebe:input source="idCaseFile" target="idCaseFile" />
+            <zeebe:input source="dirPath" target="dirPath" />
+            <zeebe:input source="idBooking" target="idBooking" />
+          </zeebe:ioMapping>
+          <zeebe:taskHeaders>
+            <zeebe:header key="pdf_template" value="roomBooking" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_13givf4</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0izik3w</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_1n5l31e" name="Send push notification ">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="notification-push" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="notificationType" value="PROTOCOLLATA" />
+            <zeebe:header key="emailTemplateType" value="templateRegistrata.html" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_00p0k80</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1wp6uw0</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_0zjfcxh" name="Update Case File">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="ASSEGNATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1wp6uw0</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0qpeiz5</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_0dy5ypg" name="Integration received">
+        <bpmn:incoming>SequenceFlow_03mltj4</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_01s8q1q</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_0pn3z9l" messageRef="Message_1cj2y28" />
+      </bpmn:intermediateCatchEvent>
+      <bpmn:endEvent id="EndEvent_0ei8ax4" name="End">
+        <bpmn:incoming>SequenceFlow_0sgt5cf</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_1x9utai</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_0sxnydb</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:serviceTask id="ServiceTask_0it035p" name="Send &#34;ask for integration&#34; notification">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="notification-front-end" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="notificationType" value="ASK_INTEGRATION" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1gggsfj</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0y5isuh</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_1i7qh76" name="Update Case File">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="RICHIESTA_INTEGRAZIONE" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1n6z3e6</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1gggsfj</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_07tp4t5" name="Update Case File">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="PROTOCOLLATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0gcaczy</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_00p0k80</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_0cf8euq" name="OutOfTimeIntegration">
+        <bpmn:incoming>SequenceFlow_1pma8l2</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_15j6wrs</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="TimerEventDefinition_1c7tj1t">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P5D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:eventBasedGateway id="EventBasedGateway_12xg3d6">
+        <bpmn:incoming>SequenceFlow_1k2w4rp</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1pma8l2</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow_03mltj4</bpmn:outgoing>
+      </bpmn:eventBasedGateway>
+      <bpmn:serviceTask id="ServiceTask_09d9mx1" name="Update Case File">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="ANNULLATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1scn1rg</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0n5mxdb</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:eventBasedGateway id="EventBasedGateway_0waoexf">
+        <bpmn:incoming>SequenceFlow_055gyqd</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0prue7z</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow_0gsbaet</bpmn:outgoing>
+      </bpmn:eventBasedGateway>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_05ta4mm" name="Payment Overdue">
+        <bpmn:incoming>SequenceFlow_0prue7z</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_160k2s4</bpmn:outgoing>
+        <bpmn:timerEventDefinition id="TimerEventDefinition_08ktly2">
+          <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">P5D</bpmn:timeDuration>
+        </bpmn:timerEventDefinition>
+      </bpmn:intermediateCatchEvent>
+      <bpmn:intermediateCatchEvent id="IntermediateCatchEvent_1vks7e0" name="Payment recieived">
+        <bpmn:incoming>SequenceFlow_0gsbaet</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1jwjfn8</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_0t8jrry" messageRef="Message_0aum5l4" />
+      </bpmn:intermediateCatchEvent>
+      <bpmn:serviceTask id="ServiceTask_18zk8j1" name="Update Room Booking">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="roombooking-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateTypeRoomBooking" value="ANNULLATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0ulox4f</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1sv35zw</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_0tay8b0" name="Update Room Booking">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="roombooking-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateTypeRoomBooking" value="CONFERMATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1rkz2s8</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0n8p68a</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_00flzej" name="Update CF-OD state">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="cf-debt-update-state" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateTypeOutstandingDebt" value="ANNULLATA" />
+            <zeebe:header key="stateTypeCaseFile" value="ANNULLATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_160k2s4</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0ulox4f</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_12f7cln" name="Update CF-OD state">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="cf-debt-update-state" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateTypeOutstandingDebt" value="CHIUSA" />
+            <zeebe:header key="stateTypeCaseFile" value="CHIUSA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1jwjfn8</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1rkz2s8</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway_0zb68we">
+        <bpmn:incoming>SequenceFlow_1vqko9f</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_0kgtpv6</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0sgt5cf</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask_15fp4pn" name="Registry Case File">
+        <bpmn:extensionElements>
+          <zeebe:ioMapping>
+            <zeebe:output source="idRegistry" target="idRegistry" />
+          </zeebe:ioMapping>
+          <zeebe:taskDefinition type="casefile-registry" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0inwlhl</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0gcaczy</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_0jzh5i6" name="Update Case File">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="CHIUDIBILE" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1o1duem</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0dnt7sm</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:exclusiveGateway id="ExclusiveGateway_0v6mwom" name="Payment Due" default="SequenceFlow_1isrtkz">
+        <bpmn:incoming>SequenceFlow_0dnt7sm</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1isrtkz</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow_17zv0fq</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:serviceTask id="ServiceTask_0lirxbq" name="Registry message">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="message-registry" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="messageType" value="INTEGRAZIONE_SCADUTA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_15j6wrs</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1scn1rg</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_1sg2cmu" name="Update Case File">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="AGGIORNATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0goiw1w</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0rnf5ev</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_1scn1rg" sourceRef="ServiceTask_0lirxbq" targetRef="ServiceTask_09d9mx1" />
+      <bpmn:sequenceFlow id="SequenceFlow_1isrtkz" name="No" sourceRef="ExclusiveGateway_0v6mwom" targetRef="ServiceTask_0eiszup" />
+      <bpmn:sequenceFlow id="SequenceFlow_17zv0fq" name="Yes" sourceRef="ExclusiveGateway_0v6mwom" targetRef="ServiceTask_0izyowr">
+        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">idDebt != null</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+      <bpmn:sequenceFlow id="SequenceFlow_01s8q1q" sourceRef="IntermediateCatchEvent_0dy5ypg" targetRef="ServiceTask_1c8z9ks" />
+      <bpmn:sequenceFlow id="SequenceFlow_0y5isuh" sourceRef="ServiceTask_0it035p" targetRef="ServiceTask_0dwi3vq" />
+      <bpmn:sequenceFlow id="SequenceFlow_0sgt5cf" sourceRef="ExclusiveGateway_0zb68we" targetRef="EndEvent_0ei8ax4" />
+      <bpmn:sequenceFlow id="SequenceFlow_13givf4" sourceRef="StartEvent_1266tl3" targetRef="ServiceTask_0n98v4m" />
+      <bpmn:sequenceFlow id="SequenceFlow_00p0k80" sourceRef="ServiceTask_07tp4t5" targetRef="ServiceTask_1n5l31e" />
+      <bpmn:sequenceFlow id="SequenceFlow_1pma8l2" sourceRef="EventBasedGateway_12xg3d6" targetRef="IntermediateCatchEvent_0cf8euq" />
+      <bpmn:sequenceFlow id="SequenceFlow_03mltj4" sourceRef="EventBasedGateway_12xg3d6" targetRef="IntermediateCatchEvent_0dy5ypg" />
+      <bpmn:sequenceFlow id="SequenceFlow_1sv35zw" sourceRef="ServiceTask_18zk8j1" targetRef="ServiceTask_0n54aw3" />
+      <bpmn:sequenceFlow id="SequenceFlow_0n8p68a" sourceRef="ServiceTask_0tay8b0" targetRef="ServiceTask_1vh9fbb" />
+      <bpmn:serviceTask id="ServiceTask_10l06gt" name="Evaluate Case File (UT)">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="user" />
+          <zeebe:ioMapping>
+            <zeebe:output source="payload.evaluation" target="evaluation" />
+            <zeebe:output source="payload.message" target="message" />
+            <zeebe:output source="payload.amount" target="amount" />
+          </zeebe:ioMapping>
+          <zeebe:taskHeaders>
+            <zeebe:header key="candidateGroup" value="ROOM_BOOKING" />
+            <zeebe:header key="jsonSchema" value="{   &#34;$schema&#34;: &#34;http://json-schema.org/draft-07/schema#&#34;,   &#34;title&#34;: &#34;User Task&#34;,   &#34;description&#34;: &#34;Payload&#34;,   &#34;type&#34;: &#34;object&#34;,   &#34;properties&#34;: {     &#34;evaluation&#34;: {       &#34;description&#34;: &#34;Il campo amount va valorizzato solo quando è necessario da parte dell’operatore comunale di rendere PAGABILE la pratica&#34;,       &#34;enum&#34;: [         &#34;CHIUDIBILE&#34;,         &#34;PAGABILE&#34;,         &#34;INTEGRABILE&#34;       ]     },     &#34;message&#34;: {       &#34;description&#34;: &#34;Messaggio libero inputato dall’operatore&#34;,       &#34;type&#34;: &#34;string&#34;     },     &#34;amount&#34;: {       &#34;type&#34;: &#34;number&#34;,       &#34;description&#34;: &#34;Importo da pagare&#34;     }   },   &#34;dependencies&#34;: {     &#34;amount&#34;: {       &#34;required&#34;: [         &#34;evaluation&#34;       ]     }   },   &#34;oneOf&#34;: [     {       &#34;properties&#34;: {         &#34;evaluation&#34;: {           &#34;const&#34;: &#34;PAGABILE&#34;         }       },       &#34;required&#34;: [         &#34;amount&#34;       ]     },     {       &#34;properties&#34;: {         &#34;evaluation&#34;: {           &#34;const&#34;: &#34;CHIUDIBILE&#34;         }       }     },     {       &#34;properties&#34;: {         &#34;evaluation&#34;: {           &#34;const&#34;: &#34;INTEGRABILE&#34;         }       }     }   ] }" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0qpeiz5</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_0v5a7n0</bpmn:incoming>
+        <bpmn:incoming>SequenceFlow_0l1ztkp</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1xe20gk</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0qpeiz5" sourceRef="ServiceTask_0zjfcxh" targetRef="ServiceTask_10l06gt" />
+      <bpmn:exclusiveGateway id="ExclusiveGateway_1lklnaw">
+        <bpmn:incoming>SequenceFlow_1xe20gk</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1o1duem</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow_1n6z3e6</bpmn:outgoing>
+        <bpmn:outgoing>SequenceFlow_1he34vp</bpmn:outgoing>
+      </bpmn:exclusiveGateway>
+      <bpmn:sequenceFlow id="SequenceFlow_1xe20gk" sourceRef="ServiceTask_10l06gt" targetRef="ExclusiveGateway_1lklnaw" />
+      <bpmn:sequenceFlow id="SequenceFlow_1wp6uw0" sourceRef="ServiceTask_1n5l31e" targetRef="ServiceTask_0zjfcxh" />
+      <bpmn:sequenceFlow id="SequenceFlow_0rnf5ev" sourceRef="ServiceTask_1sg2cmu" targetRef="ServiceTask_1c0bndq" />
+      <bpmn:serviceTask id="ServiceTask_0ev7mgq" name="Send CaseFile files to Documentale">
+        <bpmn:extensionElements>
+          <zeebe:ioMapping>
+            <zeebe:output source="pathCaseFilePDF" target="pathCaseFilePDF" />
+            <zeebe:output source="pathAttachments" target="pathAttachments" />
+          </zeebe:ioMapping>
+          <zeebe:taskDefinition type="pdf-attachment-management" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0kg76cs</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0inwlhl</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0inwlhl" sourceRef="ServiceTask_0ev7mgq" targetRef="ServiceTask_15fp4pn" />
+      <bpmn:sequenceFlow id="SequenceFlow_0gcaczy" sourceRef="ServiceTask_15fp4pn" targetRef="ServiceTask_07tp4t5" />
+      <bpmn:sequenceFlow id="SequenceFlow_0dnt7sm" sourceRef="ServiceTask_0jzh5i6" targetRef="ExclusiveGateway_0v6mwom" />
+      <bpmn:sequenceFlow id="SequenceFlow_1o1duem" sourceRef="ExclusiveGateway_1lklnaw" targetRef="ServiceTask_0jzh5i6">
+        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">evaluation == "CHIUDIBILE"</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+      <bpmn:sequenceFlow id="SequenceFlow_1gggsfj" sourceRef="ServiceTask_1i7qh76" targetRef="ServiceTask_0it035p" />
+      <bpmn:sequenceFlow id="SequenceFlow_1n6z3e6" sourceRef="ExclusiveGateway_1lklnaw" targetRef="ServiceTask_1i7qh76">
+        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">evaluation == "INTEGRABILE"</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+      <bpmn:sequenceFlow id="SequenceFlow_0n5mxdb" sourceRef="ServiceTask_09d9mx1" targetRef="ServiceTask_1a3xd28" />
+      <bpmn:sequenceFlow id="SequenceFlow_15j6wrs" sourceRef="IntermediateCatchEvent_0cf8euq" targetRef="ServiceTask_0lirxbq" />
+      <bpmn:serviceTask id="ServiceTask_07amth2" name="Update Case File">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="CREATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0izik3w</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_00417h5</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0izik3w" sourceRef="ServiceTask_0n98v4m" targetRef="ServiceTask_07amth2" />
+      <bpmn:sequenceFlow id="SequenceFlow_00417h5" sourceRef="ServiceTask_07amth2" targetRef="ServiceTask_0r95kmh" />
+      <bpmn:serviceTask id="ServiceTask_1c8z9ks" name="Send CaseFile files to Documentale">
+        <bpmn:extensionElements>
+          <zeebe:ioMapping>
+            <zeebe:output source="pathCaseFilePDF" target="pathCaseFilePDF" />
+            <zeebe:output source="pathAttachments" target="pathAttachments" />
+          </zeebe:ioMapping>
+          <zeebe:taskDefinition type="pdf-attachment-management" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_01s8q1q</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0goiw1w</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0goiw1w" sourceRef="ServiceTask_1c8z9ks" targetRef="ServiceTask_1sg2cmu" />
+      <bpmn:serviceTask id="ServiceTask_0uypko5" name="Persist Outstanding Debt">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="debt-persist" />
+          <zeebe:ioMapping>
+            <zeebe:output source="idDebt" target="idDebt" />
+          </zeebe:ioMapping>
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="APERTA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1he34vp</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1lbupfp</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_0e3gy22" name="Open Outstanding Debt">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="debt-open" />
+          <zeebe:ioMapping>
+            <zeebe:output source="iuv" target="iuv" />
+          </zeebe:ioMapping>
+          <zeebe:taskHeaders>
+            <zeebe:header key="causalePagamento" value="pagamento pratica" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1lbupfp</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0razkmo</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_0ltvy1h" name="Update Outstanding Debt IUV">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="debt-update-iuv" />
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0razkmo</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0v5a7n0</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_1lbupfp" sourceRef="ServiceTask_0uypko5" targetRef="ServiceTask_0e3gy22" />
+      <bpmn:sequenceFlow id="SequenceFlow_0razkmo" sourceRef="ServiceTask_0e3gy22" targetRef="ServiceTask_0ltvy1h" />
+      <bpmn:sequenceFlow id="SequenceFlow_1he34vp" sourceRef="ExclusiveGateway_1lklnaw" targetRef="ServiceTask_0uypko5">
+        <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">evaluation == "PAGABILE"</bpmn:conditionExpression>
+      </bpmn:sequenceFlow>
+      <bpmn:sequenceFlow id="SequenceFlow_0v5a7n0" sourceRef="ServiceTask_0ltvy1h" targetRef="ServiceTask_10l06gt" />
+      <bpmn:sequenceFlow id="SequenceFlow_0prue7z" sourceRef="EventBasedGateway_0waoexf" targetRef="IntermediateCatchEvent_05ta4mm" />
+      <bpmn:sequenceFlow id="SequenceFlow_0gsbaet" sourceRef="EventBasedGateway_0waoexf" targetRef="IntermediateCatchEvent_1vks7e0" />
+      <bpmn:sequenceFlow id="SequenceFlow_160k2s4" sourceRef="IntermediateCatchEvent_05ta4mm" targetRef="ServiceTask_00flzej" />
+      <bpmn:sequenceFlow id="SequenceFlow_0ulox4f" sourceRef="ServiceTask_00flzej" targetRef="ServiceTask_18zk8j1" />
+      <bpmn:sequenceFlow id="SequenceFlow_1jwjfn8" sourceRef="IntermediateCatchEvent_1vks7e0" targetRef="ServiceTask_12f7cln" />
+      <bpmn:sequenceFlow id="SequenceFlow_1rkz2s8" sourceRef="ServiceTask_12f7cln" targetRef="ServiceTask_0tay8b0" />
+      <bpmn:serviceTask id="ServiceTask_0r95kmh" name="Update Room Booking">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="roombooking-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateTypeRoomBooking" value="DA_CONFERMARE" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_00417h5</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0kg76cs</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0kg76cs" sourceRef="ServiceTask_0r95kmh" targetRef="ServiceTask_0ev7mgq" />
+      <bpmn:serviceTask id="ServiceTask_0dwi3vq" name="Send push notification ">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="notification-push" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="notificationType" value="RICHIESTA_INTEGRAZIONE" />
+            <zeebe:header key="emailTemplateType" value="templateIntegrazione.html" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0y5isuh</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1k2w4rp</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_1k2w4rp" sourceRef="ServiceTask_0dwi3vq" targetRef="EventBasedGateway_12xg3d6" />
+      <bpmn:serviceTask id="ServiceTask_0n54aw3" name="Send push notification ">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="notification-push" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="notificationType" value="ANNULLATA" />
+            <zeebe:header key="emailTemplateType" value="templateAnnullata.html" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1sv35zw</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1vqko9f</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_1vqko9f" sourceRef="ServiceTask_0n54aw3" targetRef="ExclusiveGateway_0zb68we" />
+      <bpmn:serviceTask id="ServiceTask_1vh9fbb" name="Send push notification ">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="notification-push" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="notificationType" value="CHIUSA" />
+            <zeebe:header key="emailTemplateType" value="templateConfermata.html" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0n8p68a</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0kgtpv6</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0kgtpv6" sourceRef="ServiceTask_1vh9fbb" targetRef="ExclusiveGateway_0zb68we" />
+      <bpmn:serviceTask id="ServiceTask_1n71cs3" name="Send push notification ">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="notification-push" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="notificationType" value="ANNULLATA" />
+            <zeebe:header key="emailTemplateType" value="templateAnnullata.html" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1eys587</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1x9utai</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_1x9utai" sourceRef="ServiceTask_1n71cs3" targetRef="EndEvent_0ei8ax4" />
+      <bpmn:serviceTask id="ServiceTask_1a3xd28" name="Update Room Booking">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="roombooking-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateTypeRoomBooking" value="ANNULLATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0n5mxdb</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1eys587</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_1eys587" sourceRef="ServiceTask_1a3xd28" targetRef="ServiceTask_1n71cs3" />
+      <bpmn:serviceTask id="ServiceTask_1xory3z" name="Update Case File">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="ASSEGNATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1fg1cpi</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0l1ztkp</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0l1ztkp" sourceRef="ServiceTask_1xory3z" targetRef="ServiceTask_10l06gt" />
+      <bpmn:serviceTask id="ServiceTask_0izyowr" name="Update Case File">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="ATTESA_PAGAMENTO" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_17zv0fq</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1of862q</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_1of862q" sourceRef="ServiceTask_0izyowr" targetRef="ServiceTask_1j71zcn" />
+      <bpmn:serviceTask id="ServiceTask_0eiszup" name="Update Case File">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="CHIUSA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1isrtkz</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0kb2gff</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:serviceTask id="ServiceTask_1j71zcn" name="Send push notification ">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="notification-push" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="notificationType" value="ATTESA_PAGAMENTO" />
+            <zeebe:header key="emailTemplateType" value="templatePagabile.html" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_1of862q</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_055gyqd</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_055gyqd" sourceRef="ServiceTask_1j71zcn" targetRef="EventBasedGateway_0waoexf" />
+      <bpmn:serviceTask id="ServiceTask_1wmt5nr" name="Send push notification ">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="notification-push" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="notificationType" value="CHIUSA" />
+            <zeebe:header key="emailTemplateType" value="templateConfermata.html" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_02sberk</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_0sxnydb</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_0sxnydb" sourceRef="ServiceTask_1wmt5nr" targetRef="EndEvent_0ei8ax4" />
+      <bpmn:sequenceFlow id="SequenceFlow_0kb2gff" sourceRef="ServiceTask_0eiszup" targetRef="ServiceTask_1tfig8r" />
+      <bpmn:serviceTask id="ServiceTask_1tfig8r" name="Update Room Booking">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="roombooking-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateTypeRoomBooking" value="CONFERMATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0kb2gff</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_02sberk</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_02sberk" sourceRef="ServiceTask_1tfig8r" targetRef="ServiceTask_1wmt5nr" />
+      <bpmn:serviceTask id="ServiceTask_1c0bndq" name="Update Case File">
+        <bpmn:extensionElements>
+          <zeebe:taskDefinition type="casefile-update" />
+          <zeebe:taskHeaders>
+            <zeebe:header key="stateType" value="PROTOCOLLATA" />
+          </zeebe:taskHeaders>
+        </bpmn:extensionElements>
+        <bpmn:incoming>SequenceFlow_0rnf5ev</bpmn:incoming>
+        <bpmn:outgoing>SequenceFlow_1fg1cpi</bpmn:outgoing>
+      </bpmn:serviceTask>
+      <bpmn:sequenceFlow id="SequenceFlow_1fg1cpi" sourceRef="ServiceTask_1c0bndq" targetRef="ServiceTask_1xory3z" />
+    </bpmn:subProcess>
+    <bpmn:endEvent id="EndEvent_0hd21mq">
+      <bpmn:incoming>SequenceFlow_1i30vkr</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:startEvent id="StartEvent_0ls8i7x">
+      <bpmn:outgoing>SequenceFlow_10kxuyi</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:boundaryEvent id="BoundaryEvent_1h0mahu" name="Cancellation received" attachedToRef="SubProcess_1xw7dgf">
+      <bpmn:outgoing>SequenceFlow_0v2dhit</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0ogxcni" messageRef="Message_08bjwey" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_10kxuyi" sourceRef="StartEvent_0ls8i7x" targetRef="SubProcess_1xw7dgf" />
+    <bpmn:sequenceFlow id="SequenceFlow_0v2dhit" sourceRef="BoundaryEvent_1h0mahu" targetRef="ServiceTask_06tpano" />
+    <bpmn:serviceTask id="ServiceTask_0tz574y" name="Update Room Booking">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="roombooking-update" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="stateTypeRoomBooking" value="ANNULLATA" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0c24ofh</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0jb8e2u</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0jb8e2u" sourceRef="ServiceTask_0tz574y" targetRef="ServiceTask_1i617n4" />
+    <bpmn:serviceTask id="ServiceTask_06tpano" name="Update Case File">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="casefile-update" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="stateType" value="ANNULLATA" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0v2dhit</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_0c24ofh</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_0c24ofh" sourceRef="ServiceTask_06tpano" targetRef="ServiceTask_0tz574y" />
+    <bpmn:serviceTask id="ServiceTask_1i617n4" name="Send push notification ">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="notification-push" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="notificationType" value="ANNULLATA" />
+          <zeebe:header key="emailTemplateType" value="templateAnnullata.html" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>SequenceFlow_0jb8e2u</bpmn:incoming>
+      <bpmn:outgoing>SequenceFlow_1i30vkr</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1i30vkr" sourceRef="ServiceTask_1i617n4" targetRef="EndEvent_0hd21mq" />
+  </bpmn:process>
+  <bpmn:message id="Message_08bjwey" name="CancellationReceived">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="idCaseFile" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_1cj2y28" name="IntegrationReceived">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="idCaseFile" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_0aum5l4" name="PaymentReceived">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="idCaseFile" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="booking-casefile">
+      <bpmndi:BPMNShape id="SubProcess_1xw7dgf_di" bpmnElement="SubProcess_1xw7dgf" isExpanded="true">
+        <dc:Bounds x="233" y="85" width="2470" height="1020" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0hd21mq_di" bpmnElement="EndEvent_0hd21mq">
+        <dc:Bounds x="3359" y="589" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="StartEvent_0ls8i7x_di" bpmnElement="StartEvent_0ls8i7x">
+        <dc:Bounds x="154" y="416" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BoundaryEvent_1h0mahu_di" bpmnElement="BoundaryEvent_1h0mahu">
+        <dc:Bounds x="2685" y="628" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2672" y="660" width="61" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_10kxuyi_di" bpmnElement="SequenceFlow_10kxuyi">
+        <di:waypoint x="190" y="434" />
+        <di:waypoint x="212" y="434" />
+        <di:waypoint x="212" y="460" />
+        <di:waypoint x="233" y="460" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0v2dhit_di" bpmnElement="SequenceFlow_0v2dhit">
+        <di:waypoint x="2721" y="646" />
+        <di:waypoint x="2777" y="646" />
+        <di:waypoint x="2777" y="607" />
+        <di:waypoint x="2833" y="607" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="StartEvent_1266tl3_di" bpmnElement="StartEvent_1266tl3">
+        <dc:Bounds x="380" y="134" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="357" y="97" width="89" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0n98v4m_di" bpmnElement="ServiceTask_0n98v4m" bioc:stroke="rgb(30, 136, 229)" bioc:fill="rgb(187, 222, 251)">
+        <dc:Bounds x="348" y="209" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1n5l31e_di" bpmnElement="ServiceTask_1n5l31e" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="942" y="537" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0zjfcxh_di" bpmnElement="ServiceTask_0zjfcxh">
+        <dc:Bounds x="1133" y="537" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_0dy5ypg_di" bpmnElement="IntermediateCatchEvent_0dy5ypg">
+        <dc:Bounds x="2169" y="939" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2215" y="943" width="52" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0ei8ax4_di" bpmnElement="EndEvent_0ei8ax4">
+        <dc:Bounds x="2407" y="626" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2443" y="663" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0it035p_di" bpmnElement="ServiceTask_0it035p">
+        <dc:Bounds x="1871" y="777" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1i7qh76_di" bpmnElement="ServiceTask_1i7qh76">
+        <dc:Bounds x="1731" y="777" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_07tp4t5_di" bpmnElement="ServiceTask_07tp4t5">
+        <dc:Bounds x="801" y="537" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_0cf8euq_di" bpmnElement="IntermediateCatchEvent_0cf8euq">
+        <dc:Bounds x="2248" y="865" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2222" y="828" width="88" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EventBasedGateway_12xg3d6_di" bpmnElement="EventBasedGateway_12xg3d6">
+        <dc:Bounds x="2162" y="792" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_09d9mx1_di" bpmnElement="ServiceTask_09d9mx1">
+        <dc:Bounds x="2384" y="840" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EventBasedGateway_0waoexf_di" bpmnElement="EventBasedGateway_0waoexf">
+        <dc:Bounds x="2407" y="144" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_05ta4mm_di" bpmnElement="IntermediateCatchEvent_05ta4mm">
+        <dc:Bounds x="2261" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2304" y="229" width="89" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_1vks7e0_di" bpmnElement="IntermediateCatchEvent_1vks7e0">
+        <dc:Bounds x="2550" y="192" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2491" y="218" width="45" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_18zk8j1_di" bpmnElement="ServiceTask_18zk8j1" bioc:stroke="black" bioc:fill="white">
+        <dc:Bounds x="2229" y="362" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0tay8b0_di" bpmnElement="ServiceTask_0tay8b0" bioc:stroke="black" bioc:fill="white">
+        <dc:Bounds x="2518" y="361" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_00flzej_di" bpmnElement="ServiceTask_00flzej" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="2229" y="255" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_12f7cln_di" bpmnElement="ServiceTask_12f7cln" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="2518" y="255" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0zb68we_di" bpmnElement="ExclusiveGateway_0zb68we" isMarkerVisible="true">
+        <dc:Bounds x="2399" y="547" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_15fp4pn_di" bpmnElement="ServiceTask_15fp4pn" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="611" y="537" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0jzh5i6_di" bpmnElement="ServiceTask_0jzh5i6">
+        <dc:Bounds x="1791" y="329" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0v6mwom_di" bpmnElement="ExclusiveGateway_0v6mwom" isMarkerVisible="true">
+        <dc:Bounds x="2103" y="344" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2140" y="326" width="67" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0lirxbq_di" bpmnElement="ServiceTask_0lirxbq" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="2384" y="692" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1sg2cmu_di" bpmnElement="ServiceTask_1sg2cmu">
+        <dc:Bounds x="1831" y="917" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1scn1rg_di" bpmnElement="SequenceFlow_1scn1rg">
+        <di:waypoint x="2434" y="772" />
+        <di:waypoint x="2434" y="840" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1isrtkz_di" bpmnElement="SequenceFlow_1isrtkz">
+        <di:waypoint x="2128" y="394" />
+        <di:waypoint x="2128" y="434" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2260" y="569" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_17zv0fq_di" bpmnElement="SequenceFlow_17zv0fq">
+        <di:waypoint x="2128" y="344" />
+        <di:waypoint x="2128" y="309" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="2271" y="157" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_01s8q1q_di" bpmnElement="SequenceFlow_01s8q1q">
+        <di:waypoint x="2169" y="957" />
+        <di:waypoint x="2120" y="957" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0y5isuh_di" bpmnElement="SequenceFlow_0y5isuh">
+        <di:waypoint x="1971" y="817" />
+        <di:waypoint x="2010" y="817" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0sgt5cf_di" bpmnElement="SequenceFlow_0sgt5cf">
+        <di:waypoint x="2424" y="597" />
+        <di:waypoint x="2424" y="612" />
+        <di:waypoint x="2425" y="612" />
+        <di:waypoint x="2425" y="626" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_13givf4_di" bpmnElement="SequenceFlow_13givf4">
+        <di:waypoint x="398" y="170" />
+        <di:waypoint x="398" y="209" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_00p0k80_di" bpmnElement="SequenceFlow_00p0k80">
+        <di:waypoint x="901" y="577" />
+        <di:waypoint x="942" y="577" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1pma8l2_di" bpmnElement="SequenceFlow_1pma8l2">
+        <di:waypoint x="2187" y="842" />
+        <di:waypoint x="2187" y="883" />
+        <di:waypoint x="2248" y="883" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_03mltj4_di" bpmnElement="SequenceFlow_03mltj4">
+        <di:waypoint x="2187" y="842" />
+        <di:waypoint x="2187" y="939" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1sv35zw_di" bpmnElement="SequenceFlow_1sv35zw">
+        <di:waypoint x="2279" y="442" />
+        <di:waypoint x="2279" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0n8p68a_di" bpmnElement="SequenceFlow_0n8p68a">
+        <di:waypoint x="2568" y="441" />
+        <di:waypoint x="2568" y="470" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_10l06gt_di" bpmnElement="ServiceTask_10l06gt">
+        <dc:Bounds x="1402" y="537" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0qpeiz5_di" bpmnElement="SequenceFlow_0qpeiz5">
+        <di:waypoint x="1233" y="577" />
+        <di:waypoint x="1402" y="577" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1lklnaw_di" bpmnElement="ExclusiveGateway_1lklnaw" isMarkerVisible="true">
+        <dc:Bounds x="1536" y="552" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1xe20gk_di" bpmnElement="SequenceFlow_1xe20gk">
+        <di:waypoint x="1502" y="577" />
+        <di:waypoint x="1536" y="577" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1wp6uw0_di" bpmnElement="SequenceFlow_1wp6uw0">
+        <di:waypoint x="1042" y="577" />
+        <di:waypoint x="1133" y="577" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0rnf5ev_di" bpmnElement="SequenceFlow_0rnf5ev">
+        <di:waypoint x="1831" y="957" />
+        <di:waypoint x="1800" y="957" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0ev7mgq_di" bpmnElement="ServiceTask_0ev7mgq" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="356" y="537" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0inwlhl_di" bpmnElement="SequenceFlow_0inwlhl">
+        <di:waypoint x="456" y="577" />
+        <di:waypoint x="611" y="577" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0gcaczy_di" bpmnElement="SequenceFlow_0gcaczy">
+        <di:waypoint x="711" y="577" />
+        <di:waypoint x="801" y="577" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0dnt7sm_di" bpmnElement="SequenceFlow_0dnt7sm">
+        <di:waypoint x="1891" y="369" />
+        <di:waypoint x="2103" y="369" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1o1duem_di" bpmnElement="SequenceFlow_1o1duem">
+        <di:waypoint x="1561" y="552" />
+        <di:waypoint x="1561" y="369" />
+        <di:waypoint x="1791" y="369" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1gggsfj_di" bpmnElement="SequenceFlow_1gggsfj">
+        <di:waypoint x="1831" y="817" />
+        <di:waypoint x="1871" y="817" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1n6z3e6_di" bpmnElement="SequenceFlow_1n6z3e6">
+        <di:waypoint x="1561" y="602" />
+        <di:waypoint x="1561" y="817" />
+        <di:waypoint x="1731" y="817" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0n5mxdb_di" bpmnElement="SequenceFlow_0n5mxdb">
+        <di:waypoint x="2484" y="880" />
+        <di:waypoint x="2587" y="880" />
+        <di:waypoint x="2587" y="850" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_15j6wrs_di" bpmnElement="SequenceFlow_15j6wrs">
+        <di:waypoint x="2284" y="883" />
+        <di:waypoint x="2347" y="883" />
+        <di:waypoint x="2347" y="732" />
+        <di:waypoint x="2384" y="732" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_07amth2_di" bpmnElement="ServiceTask_07amth2">
+        <dc:Bounds x="348" y="314" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0izik3w_di" bpmnElement="SequenceFlow_0izik3w">
+        <di:waypoint x="398" y="289" />
+        <di:waypoint x="398" y="314" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_00417h5_di" bpmnElement="SequenceFlow_00417h5">
+        <di:waypoint x="398" y="394" />
+        <di:waypoint x="398" y="430" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1c8z9ks_di" bpmnElement="ServiceTask_1c8z9ks" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="2020" y="917" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0goiw1w_di" bpmnElement="SequenceFlow_0goiw1w">
+        <di:waypoint x="2020" y="957" />
+        <di:waypoint x="1931" y="957" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0uypko5_di" bpmnElement="ServiceTask_0uypko5" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="1663" y="537" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0e3gy22_di" bpmnElement="ServiceTask_0e3gy22" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="1784" y="537" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_0ltvy1h_di" bpmnElement="ServiceTask_0ltvy1h" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="1909" y="537" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1lbupfp_di" bpmnElement="SequenceFlow_1lbupfp">
+        <di:waypoint x="1763" y="577" />
+        <di:waypoint x="1784" y="577" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0razkmo_di" bpmnElement="SequenceFlow_0razkmo">
+        <di:waypoint x="1884" y="577" />
+        <di:waypoint x="1909" y="577" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1he34vp_di" bpmnElement="SequenceFlow_1he34vp">
+        <di:waypoint x="1586" y="577" />
+        <di:waypoint x="1663" y="577" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0v5a7n0_di" bpmnElement="SequenceFlow_0v5a7n0">
+        <di:waypoint x="1959" y="537" />
+        <di:waypoint x="1959" y="479" />
+        <di:waypoint x="1452" y="479" />
+        <di:waypoint x="1452" y="537" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0prue7z_di" bpmnElement="SequenceFlow_0prue7z">
+        <di:waypoint x="2407" y="169" />
+        <di:waypoint x="2279" y="169" />
+        <di:waypoint x="2279" y="192" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0gsbaet_di" bpmnElement="SequenceFlow_0gsbaet">
+        <di:waypoint x="2457" y="169" />
+        <di:waypoint x="2568" y="169" />
+        <di:waypoint x="2568" y="192" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_160k2s4_di" bpmnElement="SequenceFlow_160k2s4">
+        <di:waypoint x="2279" y="228" />
+        <di:waypoint x="2279" y="255" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0ulox4f_di" bpmnElement="SequenceFlow_0ulox4f">
+        <di:waypoint x="2279" y="335" />
+        <di:waypoint x="2279" y="362" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1jwjfn8_di" bpmnElement="SequenceFlow_1jwjfn8">
+        <di:waypoint x="2568" y="228" />
+        <di:waypoint x="2568" y="255" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1rkz2s8_di" bpmnElement="SequenceFlow_1rkz2s8">
+        <di:waypoint x="2568" y="335" />
+        <di:waypoint x="2568" y="361" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0r95kmh_di" bpmnElement="ServiceTask_0r95kmh" bioc:stroke="black" bioc:fill="white">
+        <dc:Bounds x="356" y="430" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0kg76cs_di" bpmnElement="SequenceFlow_0kg76cs">
+        <di:waypoint x="406" y="510" />
+        <di:waypoint x="406" y="537" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0tz574y_di" bpmnElement="ServiceTask_0tz574y" bioc:stroke="black" bioc:fill="white">
+        <dc:Bounds x="3036" y="567" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0jb8e2u_di" bpmnElement="SequenceFlow_0jb8e2u">
+        <di:waypoint x="3136" y="607" />
+        <di:waypoint x="3210" y="607" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0dwi3vq_di" bpmnElement="ServiceTask_0dwi3vq" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="2010" y="777" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1k2w4rp_di" bpmnElement="SequenceFlow_1k2w4rp">
+        <di:waypoint x="2110" y="817" />
+        <di:waypoint x="2162" y="817" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0n54aw3_di" bpmnElement="ServiceTask_0n54aw3" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="2229" y="470" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1vqko9f_di" bpmnElement="SequenceFlow_1vqko9f">
+        <di:waypoint x="2279" y="550" />
+        <di:waypoint x="2279" y="572" />
+        <di:waypoint x="2399" y="572" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1vh9fbb_di" bpmnElement="ServiceTask_1vh9fbb" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="2518" y="470" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0kgtpv6_di" bpmnElement="SequenceFlow_0kgtpv6">
+        <di:waypoint x="2568" y="550" />
+        <di:waypoint x="2568" y="572" />
+        <di:waypoint x="2449" y="572" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1n71cs3_di" bpmnElement="ServiceTask_1n71cs3" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="2537" y="665" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1x9utai_di" bpmnElement="SequenceFlow_1x9utai">
+        <di:waypoint x="2587" y="665" />
+        <di:waypoint x="2587" y="644" />
+        <di:waypoint x="2443" y="644" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1a3xd28_di" bpmnElement="ServiceTask_1a3xd28" bioc:stroke="black" bioc:fill="white">
+        <dc:Bounds x="2537" y="770" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1eys587_di" bpmnElement="SequenceFlow_1eys587">
+        <di:waypoint x="2587" y="770" />
+        <di:waypoint x="2587" y="745" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1xory3z_di" bpmnElement="ServiceTask_1xory3z">
+        <dc:Bounds x="1557" y="917" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0l1ztkp_di" bpmnElement="SequenceFlow_0l1ztkp">
+        <di:waypoint x="1557" y="957" />
+        <di:waypoint x="1452" y="957" />
+        <di:waypoint x="1452" y="617" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0izyowr_di" bpmnElement="ServiceTask_0izyowr">
+        <dc:Bounds x="2078" y="229" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1of862q_di" bpmnElement="SequenceFlow_1of862q">
+        <di:waypoint x="2128" y="229" />
+        <di:waypoint x="2128" y="209" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0eiszup_di" bpmnElement="ServiceTask_0eiszup">
+        <dc:Bounds x="2078" y="434" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_06tpano_di" bpmnElement="ServiceTask_06tpano">
+        <dc:Bounds x="2833" y="567" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0c24ofh_di" bpmnElement="SequenceFlow_0c24ofh">
+        <di:waypoint x="2933" y="607" />
+        <di:waypoint x="3036" y="607" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1j71zcn_di" bpmnElement="ServiceTask_1j71zcn" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="2078" y="129" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_055gyqd_di" bpmnElement="SequenceFlow_055gyqd">
+        <di:waypoint x="2128" y="129" />
+        <di:waypoint x="2128" y="120" />
+        <di:waypoint x="2432" y="120" />
+        <di:waypoint x="2432" y="144" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1i617n4_di" bpmnElement="ServiceTask_1i617n4" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="3210" y="567" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1i30vkr_di" bpmnElement="SequenceFlow_1i30vkr">
+        <di:waypoint x="3310" y="607" />
+        <di:waypoint x="3359" y="607" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1wmt5nr_di" bpmnElement="ServiceTask_1wmt5nr" bioc:stroke="rgb(251, 140, 0)" bioc:fill="rgb(255, 224, 178)">
+        <dc:Bounds x="2260" y="604" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0sxnydb_di" bpmnElement="SequenceFlow_0sxnydb">
+        <di:waypoint x="2360" y="644" />
+        <di:waypoint x="2407" y="644" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0kb2gff_di" bpmnElement="SequenceFlow_0kb2gff">
+        <di:waypoint x="2128" y="514" />
+        <di:waypoint x="2128" y="550" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1tfig8r_di" bpmnElement="ServiceTask_1tfig8r" bioc:stroke="black" bioc:fill="white">
+        <dc:Bounds x="2078" y="550" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_02sberk_di" bpmnElement="SequenceFlow_02sberk">
+        <di:waypoint x="2128" y="630" />
+        <di:waypoint x="2128" y="644" />
+        <di:waypoint x="2260" y="644" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_1c0bndq_di" bpmnElement="ServiceTask_1c0bndq">
+        <dc:Bounds x="1700" y="917" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1fg1cpi_di" bpmnElement="SequenceFlow_1fg1cpi">
+        <di:waypoint x="1700" y="957" />
+        <di:waypoint x="1657" y="957" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

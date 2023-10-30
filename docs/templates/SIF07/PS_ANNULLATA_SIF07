@@ -1,0 +1,1 @@
+<html> <head></head> <body> <p>Spett.le ${nome_ric} ${cognome_ric},<br /> si comunica che la Sua domanda di Pagamento Spontaneo per la seguente causale:</p> <p>${causale}</p> <p>&Egrave; stata annullata per i seguenti motivi:</p> <p>${note}</p> <p>&nbsp;</p> <p>Distinti saluti.</p> </body> </html>

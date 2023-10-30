@@ -1,0 +1,1 @@
+<html><head></head><body><p>Spett.le ${nome_ric} ${cognome_ric},<br> si comunica che la sua richiesta di prenotazione: <b><u> ${spazio} </u></b> per il <b><u> ${data_prenotazione} </u></b><br/></p><p>&Egrave; stata REVOCATA per i seguenti motivi: </p><p>${note}</p><p>Distinti saluti.</p><p>&nbsp;</p></body></html>
